@@ -2,20 +2,20 @@ module.exports = function (grunt) {
 
     var config = {
         npmTasks: [
-            'grunt-contrib-concat', 'grunt-contrib-uglify'
+            'grunt-contrib-concat', 'grunt-contrib-uglify', 'grunt-contrib-clean', 'grunt-contrib-copy'
         ],
         customTasks: {
             default: {
                 desc: '',
-                tasks: ['']
+                tasks: ['dev']
             },
             dev: {
                 desc: '',
-                tasks: ['concat']
+                tasks: ['clean', 'concat', 'copy']
             },
             prod: {
                 desc: '',
-                tasks: ['concat', 'uglify']
+                tasks: ['clean', 'concat', 'uglify', 'copy']
             }
         }
     }
@@ -23,6 +23,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
+        clean: ['build/'],
         concat: {
             dist: {
                 src: [
@@ -35,9 +36,17 @@ module.exports = function (grunt) {
         uglify: {
             build: {
                 src: 'build/js/app.js',
-                dest: 'build/js/app.min.js'
+                dest: 'build/js/app.js'
             }
-        }
+        },
+        copy: {
+            main: {
+                expand:true,
+                cwd:'src/html',
+                src: ['**/*.html'],
+                dest: 'build/',
+            },
+        },
 
     });
 
