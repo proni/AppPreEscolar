@@ -2,7 +2,7 @@ module.exports = function (grunt) {
 
     var config = {
         npmTasks: [
-            'grunt-contrib-concat', 'grunt-contrib-uglify', 'grunt-contrib-clean', 'grunt-contrib-copy'
+            'grunt-contrib-concat', 'grunt-contrib-uglify', 'grunt-contrib-clean', 'grunt-contrib-copy', 'grunt-contrib-less', 'grunt-contrib-imagemin', 'grunt-contrib-watch'
         ],
         customTasks: {
             default: {
@@ -11,11 +11,11 @@ module.exports = function (grunt) {
             },
             dev: {
                 desc: '',
-                tasks: ['clean', 'concat', 'copy']
+                tasks: ['clean', 'concat', 'less:dev', 'imagemin', 'copy:html', 'copy:images', 'watch']
             },
             prod: {
                 desc: '',
-                tasks: ['clean', 'concat', 'uglify', 'copy']
+                tasks: ['clean', 'concat', 'uglify', 'less:prod', 'copy:html', 'copy:images', 'imagemin']
             }
         }
     }
@@ -40,13 +40,65 @@ module.exports = function (grunt) {
             }
         },
         copy: {
-            main: {
-                expand:true,
-                cwd:'src/html',
+            html: {
+                expand: true,
+                cwd: 'src/html',
                 src: ['**/*.html'],
                 dest: 'build/',
             },
+            images: {
+                expand: true,
+                cwd: 'src/images',
+                src: ['**/*.{png,jpg,gif}'],
+                dest: 'build/images',
+            },
         },
+        less: {
+            dev: {
+                options: {
+                    ieCompat: true,
+                    paths: ["src/less"]
+                },
+                files: {"build/css/app.css": "src/less/style.less"}
+            },
+            prod: {
+                options: {
+                    compress: true,
+                    ieCompat: true,
+                    paths: ["src/less"]
+                },
+                files: {"build/css/app.css": "src/less/style.less"}
+            }
+        },
+        imagemin: {
+            dynamic: {
+                files: [{
+                    expand: true,
+                    cwd: 'images/',
+                    src: ['**/*.{png,jpg,gif}'],
+                    dest: 'build/images/'
+                }]
+            }
+        },
+        watch: {
+            options: {
+                livereload: true,
+            },
+            scripts: {
+                files: ['src/js/*.js'],
+                tasks: ['concat'],
+                options: {
+                    spawn: false,
+                },
+            },
+            css: {
+                files: ['src/less/*.less'],
+                tasks: ['less:dev'],
+                options: {
+                    spawn: false,
+                }
+            }
+        }
 
     });
 
