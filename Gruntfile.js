@@ -2,7 +2,7 @@ module.exports = function (grunt) {
 
     var config = {
         npmTasks: [
-            'grunt-contrib-concat', 'grunt-contrib-uglify', 'grunt-contrib-clean', 'grunt-contrib-copy', 'grunt-contrib-less', 'grunt-contrib-imagemin', 'grunt-contrib-watch'
+            'grunt-contrib-concat', 'grunt-contrib-uglify', 'grunt-contrib-clean', 'grunt-contrib-copy', 'grunt-contrib-less', 'grunt-contrib-imagemin', 'grunt-contrib-watch', 'grunt-express', 'grunt-open'
         ],
         customTasks: {
             default: {
@@ -11,7 +11,7 @@ module.exports = function (grunt) {
             },
             dev: {
                 desc: '',
-                tasks: ['clean', 'concat', 'less:dev', 'imagemin', 'copy:html', 'copy:images', 'watch']
+                tasks: ['clean', 'concat', 'less:dev', 'imagemin', 'copy:html', 'copy:images', 'express', 'open', 'watch']
             },
             prod: {
                 desc: '',
@@ -82,24 +82,46 @@ module.exports = function (grunt) {
         },
         watch: {
             options: {
-                livereload: true,
+                livereload: true
             },
             scripts: {
-                files: ['src/js/*.js'],
+                files: ['src/js/**/*.js'],
                 tasks: ['concat'],
                 options: {
                     spawn: false,
                 },
             },
             css: {
-                files: ['src/less/*.less'],
+                files: ['src/less/**/*.less'],
                 tasks: ['less:dev'],
                 options: {
                     spawn: false,
                 }
+            },
+            html: {
+                files: ['src/html/**/*.html'],
+                tasks: ['copy:html']
+            },
+            images: {
+                files: ['src/images/**/*.{png,jpg,gif}'],
+                tasks: ['imagemin', 'copy:images']
+            }
+        },
+        express: {
+            all: {
+                options: {
+                    port: 8082,
+                    bases: ['build'],
+                    hostname: "0.0.0.0",
+                    livereload: true
+                }
+            }
+        },
+        open: {
+            all: {
+                path: 'http://localhost:8082/index.html'
             }
         }
-
     });
 
     for (id in config.npmTasks) {
