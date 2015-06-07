@@ -11,7 +11,11 @@ module.exports = function (grunt) {
             },
             dev: {
                 desc: '',
-                tasks: ['clean', 'concat', 'less:dev', 'imagemin', 'copy:html', 'copy:images', 'express', 'open', 'watch']
+                tasks: ['clean', 'concat', 'less:dev', 'copy:html', 'copy:images', 'imagemin', 'express', 'open', 'watch']
+            },
+            qa: {
+                desc: '',
+                tasks: ['clean', 'concat', 'less:dev', 'copy:html', 'copy:images', 'imagemin']
             },
             prod: {
                 desc: '',
