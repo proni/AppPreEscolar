@@ -1,0 +1,4 @@
+/*
+	AppPreEscolar Custom Javascript
+*/
+

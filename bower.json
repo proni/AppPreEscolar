@@ -1,0 +1,13 @@
+{
+  "name": "AppPreEscolar",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~1.11.0"
+  },
+  "install": {
+    "path": {
+      "js": "src/js/libs"
+    }
+  },
+  "private": true
+}
