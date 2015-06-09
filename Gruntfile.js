@@ -2,7 +2,20 @@ module.exports = function (grunt) {
 
     var config = {
         npmTasks: [
-            'grunt-contrib-concat', 'grunt-contrib-uglify', 'grunt-contrib-clean', 'grunt-contrib-copy', 'grunt-contrib-less', 'grunt-contrib-imagemin', 'grunt-contrib-watch', 'grunt-express', 'grunt-open'
+            'grunt-contrib-concat',
+            'grunt-contrib-uglify',
+            'grunt-contrib-clean',
+            'grunt-contrib-copy',
+            'grunt-contrib-less',
+            'grunt-contrib-imagemin',
+            'grunt-contrib-watch',
+            'grunt-express',
+            'grunt-open',
+            'grunt-contrib-csslint',
+            'grunt-html',
+            'grunt-contrib-jshint',
+            'grunt-lesslint',
+            'grunt-contrib-htmlmin'
         ],
         customTasks: {
             default: {
@@ -11,15 +24,15 @@ module.exports = function (grunt) {
             },
             dev: {
                 desc: '',
-                tasks: ['clean', 'concat', 'less:dev', 'copy:html', 'copy:images', 'imagemin', 'express', 'open', 'watch']
+                tasks: ['clean', 'jshint', 'concat', 'lesslint', 'less:dev', 'csslint', 'htmllint', 'copy:html', 'copy:images', 'imagemin', 'express', 'open', 'watch']
             },
             qa: {
                 desc: '',
-                tasks: ['clean', 'concat', 'less:dev', 'copy:html', 'copy:images', 'imagemin']
+                tasks: ['clean', 'jshint', 'concat', 'lesslint', 'less:dev', 'csslint', 'htmllint', 'copy:html', 'copy:images', 'imagemin']
             },
             prod: {
                 desc: '',
-                tasks: ['clean', 'concat', 'uglify', 'less:prod', 'copy:html', 'copy:images', 'imagemin']
+                tasks: ['clean', 'concat', 'uglify', 'less:prod', 'htmlmin', 'copy:images', 'imagemin']
             }
         }
     }
@@ -28,6 +41,38 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         clean: ['build/'],
+        jshint: {
+            dist: {
+                src: [
+                    'src/js/*.js',
+                    '!src/js/*.min.js'
+                ]
+            }
+        },
+        htmllint: {
+            dist: {
+                options: {
+                    path: false,
+                    reportpath: false
+                },
+                src: [
+                    'src/**/*.html',
+                    '!src/**/*.min.html'
+                ]
+            }
+        },
+        lesslint: {
+            src: ['src/less/*.less']
+        },
+        csslint: {
+            // The files that we want to check.
+            dist: {
+                src: [
+                    'build/css/**/*.css', // Include all CSS files in this directory.
+                    'build/css/**/!*.min.css' // Exclude any files ending with `.min.css`
+                ]
+            }
+        },
         concat: {
             dist: {
                 src: [
@@ -39,6 +84,7 @@ module.exports = function (grunt) {
         },
         uglify: {
             build: {
+                jquery: true,
                 src: 'build/js/app.js',
                 dest: 'build/js/app.js'
             }
@@ -56,6 +102,21 @@ module.exports = function (grunt) {
                 src: ['**/*.{png,jpg,gif}'],
                 dest: 'build/images',
             },
+        },
+        htmlmin: {
+            dist: {
+                options: {
+                    collapseWhitespace: true,
+                    removeComments: true
+                },
+
+                files: [{
+                    expand: true,
+                    cwd: 'src/html',
+                    src: ['**/*.html', '!**/*.min.html'],
+                    dest: 'build/',
+                }]
+            }
         },
         less: {
             dev: {
@@ -90,21 +151,21 @@ module.exports = function (grunt) {
             },
             scripts: {
                 files: ['src/js/**/*.js'],
-                tasks: ['concat'],
+                tasks: ['jshint', 'concat'],
                 options: {
                     spawn: false,
                 },
             },
             css: {
                 files: ['src/less/**/*.less'],
-                tasks: ['less:dev'],
+                tasks: ['lesslint', 'less:dev', 'csslint'],
                 options: {
                     spawn: false,
                 }
             },
             html: {
                 files: ['src/html/**/*.html'],
-                tasks: ['copy:html']
+                tasks: ['htmllint', 'copy:html']
             },
             images: {
                 files: ['src/images/**/*.{png,jpg,gif}'],
