@@ -4,10 +4,5 @@
   "dependencies": {
     "jquery": "~1.11.0"
   },
-  "install": {
-    "path": {
-      "js": "src/js/libs"
-    }
-  },
   "private": true
 }

@@ -1,11 +1,10 @@
 module.exports = function (grunt) {
 
-    var config = {
-        npmTasks: [
+    var tasks = {
+        npm: [
             'grunt-contrib-concat',
             'grunt-contrib-uglify',
             'grunt-contrib-clean',
-            'grunt-contrib-copy',
             'grunt-contrib-less',
             'grunt-contrib-imagemin',
             'grunt-contrib-watch',
@@ -17,182 +16,246 @@ module.exports = function (grunt) {
             'grunt-lesslint',
             'grunt-contrib-htmlmin'
         ],
-        customTasks: {
-            default: {
-                desc: '',
-                tasks: ['dev']
-            },
-            dev: {
-                desc: '',
-                tasks: ['clean', 'jshint', 'concat', 'lesslint', 'less:dev', 'csslint', 'htmllint', 'copy:html', 'copy:images', 'imagemin', 'express', 'open', 'watch']
-            },
+        deploy: {
+            default: [
+                'dev'
+            ],
+            dev: [
+                'qa', 'express', 'open', 'watch'
+            ],
             qa: {
-                desc: '',
-                tasks: ['clean', 'jshint', 'concat', 'lesslint', 'less:dev', 'csslint', 'htmllint', 'copy:html', 'copy:images', 'imagemin']
+                init: [
+                    'clean'
+                ],
+                css: [
+                    'lesslint', 'less:qa', 'csslint'
+                ],
+                js: [
+                    'jshint', 'concat'
+                ],
+                html: [
+                    'htmllint', 'htmlmin:qa'
+                ],
+                images: [
+                    'imagemin'
+                ]
             },
             prod: {
-                desc: '',
-                tasks: ['clean', 'concat', 'uglify', 'less:prod', 'htmlmin', 'copy:images', 'imagemin']
+                init: [
+                    'clean'
+                ],
+                css: [
+                    'lesslint', 'less:prod'
+                ],
+                js: [
+                    'jshint', 'concat', 'uglify'
+                ],
+                html: [
+                    'htmllint', 'htmlmin:prod'
+                ],
+                images: [
+                    'imagemin'
+                ]
             }
         }
     }
 
     grunt.initConfig({
-        pkg: grunt.file.readJSON('package.json'),
+            config: {
+                src: {
+                    js: ['src/js/**/*.js'],
+                    less: ['src/less/**/*.less'],
 
-        clean: ['build/'],
-        jshint: {
-            dist: {
-                src: [
-                    'src/js/*.js',
-                    '!src/js/*.min.js'
-                ]
-            }
-        },
-        htmllint: {
-            dist: {
-                options: {
-                    path: false,
-                    reportpath: false
-                },
-                src: [
-                    'src/**/*.html',
-                    '!src/**/*.min.html'
-                ]
-            }
-        },
-        lesslint: {
-            src: ['src/less/*.less']
-        },
-        csslint: {
-            // The files that we want to check.
-            dist: {
-                src: [
-                    'build/css/**/*.css', // Include all CSS files in this directory.
-                    'build/css/**/!*.min.css' // Exclude any files ending with `.min.css`
-                ]
-            }
-        },
-        concat: {
-            dist: {
-                src: [
-                    'src/js/**/*.js',
-                    'src/js/main.js'
-                ],
-                dest: 'build/js/app.js',
-            }
-        },
-        uglify: {
-            build: {
-                jquery: true,
-                src: 'build/js/app.js',
-                dest: 'build/js/app.js'
-            }
-        },
-        copy: {
-            html: {
-                expand: true,
-                cwd: 'src/html',
-                src: ['**/*.html'],
-                dest: 'build/',
-            },
-            images: {
-                expand: true,
-                cwd: 'src/images',
-                src: ['**/*.{png,jpg,gif}'],
-                dest: 'build/images',
-            },
-        },
-        htmlmin: {
-            dist: {
-                options: {
-                    collapseWhitespace: true,
-                    removeComments: true
-                },
+                    htmlDir: 'src/html/',
+                    htmlFiles: '**/*.html',
+                    html: ['<%= config.src.htmlDir %>' + '<%= config.src.htmlFiles %>'],
 
-                files: [{
-                    expand: true,
-                    cwd: 'src/html',
-                    src: ['**/*.html', '!**/*.min.html'],
-                    dest: 'build/',
-                }]
-            }
-        },
-        less: {
-            dev: {
-                options: {
-                    ieCompat: true,
-                    paths: ["src/less"]
+                    imagesDir: 'src/images/',
+                    imagesFiles: '**/*.{png,jpg,gif}',
+                    images: ['<%= config.src.imagesDir %>' + '<%= config.src.imagesFiles %>']
                 },
-                files: {"build/css/app.css": "src/less/style.less"}
-            },
-            prod: {
-                options: {
-                    compress: true,
-                    ieCompat: true,
-                    paths: ["src/less"]
+                dest: {
+                    dir: "build/",
+                    images: "build/images",
+                    js: "build/js/app.js",
+                    css: "build/css/app.css",
                 },
-                files: {"build/css/app.css": "src/less/style.less"}
-            }
-        },
-        imagemin: {
-            dynamic: {
-                files: [{
-                    expand: true,
-                    cwd: 'images/',
-                    src: ['**/*.{png,jpg,gif}'],
-                    dest: 'build/images/'
-                }]
-            }
-        },
-        watch: {
-            options: {
-                livereload: true
-            },
-            scripts: {
-                files: ['src/js/**/*.js'],
-                tasks: ['jshint', 'concat'],
-                options: {
-                    spawn: false,
+                vendor: {
+                    js: ['bower_components/jquery/dist/jquery.min.js']
                 },
-            },
-            css: {
-                files: ['src/less/**/*.less'],
-                tasks: ['lesslint', 'less:dev', 'csslint'],
-                options: {
-                    spawn: false,
+                express: {
+                    port: 8280,
+                    host: '127.0.0.1'
                 }
             },
-            html: {
-                files: ['src/html/**/*.html'],
-                tasks: ['htmllint', 'copy:html']
+
+            clean: {
+                build: {
+                    src: '<%= config.dest.dir %>'
+                }
             },
-            images: {
-                files: ['src/images/**/*.{png,jpg,gif}'],
-                tasks: ['imagemin', 'copy:images']
+            jshint: {
+                build: {
+                    src: '<%= config.src.js %>'
+                }
             }
-        },
-        express: {
-            all: {
+            ,
+            htmllint: {
+                build: {
+                    src: '<%= config.src.html %>'
+                }
+            }
+            ,
+            lesslint: {
+                build: {
+                    src: '<%= config.src.less %>'
+                }
+            }
+            ,
+            csslint: {
+                build: {
+                    src: '<%= config.dest.css %>'
+                }
+            }
+            ,
+            concat: {
+                build: {
+                    src: ['<%= config.src.js %>', '<%= config.vendor.js %>'], dest: '<%= config.dest.js %>',
+                }
+            }
+            ,
+            uglify: {
+                build: {
+                    src: '<%= config.dest.js %>', dest: '<%= config.dest.js %>'
+                }
+            }
+            ,
+            htmlmin: {
+                qa: {
+                    files: [{
+                        expand: true,
+                        cwd: '<%= config.src.htmlDir %>',
+                        src: ['<%= config.src.htmlFiles %>'],
+                        dest: '<%= config.dest.dir %>',
+                    }]
+                }
+                ,
+                prod: {
+                    options: {
+                        collapseWhitespace: true, removeComments: true
+                    }
+                    ,
+
+                    files: [{
+                        expand: true,
+                        cwd: '<%= config.src.htmlDir %>',
+                        src: ['<%= config.src.htmlFiles %>'],
+                        dest: '<%= config.dest.dir %>',
+                    }]
+                }
+            }
+            ,
+            less: {
+                qa: {
+                    options: {
+                        ieCompat: true,
+                    }
+                    ,
+                    src: '<%= config.src.less %>', dest: '<%= config.dest.css %>'
+                }
+                ,
+                prod: {
+                    options: {
+                        compress: true,
+                        ieCompat: true,
+                    }
+                    ,
+                    src: '<%= config.src.less %>', dest: '<%= config.dest.css %>'
+                }
+            }
+            ,
+            imagemin: {
+                build: {
+                    files: [{
+                        expand: true,
+                        cwd: '<%= config.src.imagesDir %>',
+                        src: ['<%= config.src.imagesFiles %>'],
+                        dest: '<%= config.dest.images %>'
+                    }]
+                }
+            }
+            ,
+            watch: {
                 options: {
-                    port: 8082,
-                    bases: ['build'],
-                    hostname: "0.0.0.0",
                     livereload: true
                 }
+                ,
+                js: {
+                    files: '<%= config.src.js %>', tasks: tasks.deploy.qa.js,
+                }
+                ,
+                css: {
+                    files: '<%= config.src.less %>', tasks: tasks.deploy.qa.css
+                }
+                ,
+                html: {
+                    files: '<%= config.src.html %>', tasks: tasks.deploy.qa.html
+                }
+                ,
+                images: {
+                    files: '<%= config.src.images %>', tasks: tasks.deploy.qa.images
+                }
             }
-        },
-        open: {
-            all: {
-                path: 'http://localhost:8082/index.html'
+            ,
+            express: {
+                all: {
+                    options: {
+                        port: '<%= config.express.port %>',
+                        bases: ['<%= config.dest.dir %>'],
+                        hostname: '<%= config.express.host %>',
+                        livereload: true
+                    }
+                }
+            }
+            ,
+            open: {
+                all: {
+                    path: 'http://' + '<%= config.express.host %>' + ':' + '<%= config.express.port %>'
+                }
             }
         }
-    });
+    )
 
-    for (id in config.npmTasks) {
-        grunt.loadNpmTasks(config.npmTasks[id]);
+    function generateId(oldId, newId) {
+        return !oldId || 0 === oldId.length ? newId : oldId + ":" + newId;
     }
-    for (id in config.customTasks) {
-        grunt.registerTask(id, config.customTasks[id].desc, config.customTasks[id].tasks);
+
+    function registerTask(id, tasks, desc) {
+        if (id && tasks && tasks.length > 0) {
+            grunt.registerTask(id, tasks, desc);
+        }
+        return tasks;
     }
-};
+
+    function registerTasks(current, id) {
+
+        if (current.constructor === Array) {
+            return registerTask(id, current);
+        }
+        if (current.constructor === Object && current.tasks) {
+            return registerTask(id, current.tasks, current.desc);
+        }
+
+        var parentTasks = [];
+        for (var prop in current) {
+            parentTasks = parentTasks.concat(registerTasks(current[prop], generateId(id, prop)));
+        }
+        return registerTask(id, parentTasks, current.desc);
+    }
+
+
+    for (id in tasks.npm) {
+        grunt.loadNpmTasks(tasks.npm[id]);
+    }
+    registerTasks(tasks.deploy);
+}

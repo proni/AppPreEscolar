@@ -17,6 +17,7 @@
     "grunt-express": "^1.4.1",
     "grunt-html": "^4.0.3",
     "grunt-lesslint": "^1.1.14",
-    "grunt-open": "^0.2.3"
+    "grunt-open": "^0.2.3",
+    "grunt-rename": "^0.1.4"
   }
 }
